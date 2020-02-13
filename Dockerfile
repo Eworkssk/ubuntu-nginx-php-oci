@@ -44,7 +44,7 @@ RUN add-apt-repository ppa:ondrej/php -y && \
 RUN apt-get install -y nginx-full=${NGINX_VERSION}
 
 # Install PHP and stuff
-RUN apt-get install -y php${PHP_VERSION} \
+RUN apt-get update -y && apt-get install -y php${PHP_VERSION} \
     php${PHP_VERSION}-bcmath \
     php${PHP_VERSION}-curl \
     php${PHP_VERSION}-dev \
@@ -61,6 +61,8 @@ RUN apt-get install -y php${PHP_VERSION} \
     php${PHP_VERSION}-xml \
     php${PHP_VERSION}-zip \
     php-pear \
+    php-xml \
+    php-redis=5.1\* \
     imagemagick=8:6.9.7.4\* \
     php-imagick=3.4.4\* \
     ghostscript=9.26\* \
