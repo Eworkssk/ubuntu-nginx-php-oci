@@ -68,6 +68,10 @@ RUN apt-get update -y && apt-get install -y php${PHP_VERSION} \
     ghostscript=9.26\* \
     poppler-utils=0.62\*
 
+# FFMPEG
+ENV FFMPEG_VERSION=7:3.4.6\*
+RUN apt-get update -y && apt-get install -y ffmpeg=${FFMPEG_VERSION}
+
 # Instantclient
 COPY ./instantclient/instantclient.zip /instantclient.zip
 COPY ./instantclient/instantclient_sdk.zip /instantclient_sdk.zip
