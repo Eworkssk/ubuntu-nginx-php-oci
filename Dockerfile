@@ -46,6 +46,7 @@ RUN apt-get install -y nginx-full=${NGINX_VERSION}
 # Install PHP and stuff
 RUN apt-get update -y && apt-get install -y php${PHP_VERSION} \
     php${PHP_VERSION}-bcmath \
+    php${PHP_VERSION}-cli \
     php${PHP_VERSION}-curl \
     php${PHP_VERSION}-dev \
     php${PHP_VERSION}-fpm \
@@ -62,7 +63,7 @@ RUN apt-get update -y && apt-get install -y php${PHP_VERSION} \
     php${PHP_VERSION}-zip \
     php-pear \
     php-xml \
-    php-redis=5.1\* \
+    php-redis=5.2\* \
     imagemagick=8:6.9.7.4\* \
     php-imagick=3.4.4\* \
     ghostscript=9.26\* \
