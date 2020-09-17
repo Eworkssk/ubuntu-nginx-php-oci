@@ -2,10 +2,7 @@ FROM ubuntu:18.04
 
 ENV NGINX_VERSION=1.14.* \
     SUPERVISOR_VERSION=3.3.* \
-    PHP_VERSION=7.3 \
-    ORACLE_VERSION=19.3 \
-    ORACLE_VERSION_PATH="19_3" \
-    OCI_VERSION=2.2.0
+    PHP_VERSION=7.3
 
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -30,6 +27,8 @@ RUN apt-get update -y && apt-get upgrade -y && apt-get install --no-install-reco
     libicu-dev \
     libmcrypt-dev \
     libpq-dev \
+    libssh2-1 \
+    libssh2-1-dev \
     supervisor=${SUPERVISOR_VERSION} \
     unzip \
     zip \
@@ -63,29 +62,12 @@ RUN apt-get update -y && apt-get install -y php${PHP_VERSION} \
     php${PHP_VERSION}-zip \
     php-pear \
     php-xml \
-    php-redis=5.2\* \
     imagemagick=8:6.9.7.4\* \
     php-imagick=3.4.4\* \
     ghostscript=9.26\* \
     poppler-utils=0.62\*
 
-# Instantclient
-COPY ./instantclient/instantclient.zip /instantclient.zip
-COPY ./instantclient/instantclient_sdk.zip /instantclient_sdk.zip
-
-RUN unzip instantclient.zip -d /usr/local && \
-    unzip instantclient_sdk.zip -d /usr/local && \
-    ln -s /usr/local/instantclient_${ORACLE_VERSION_PATH} /usr/local/instantclient && \
-    ln -s /usr/local/instantclient/lib* /usr/lib && \
-    rm /instantclient.zip && rm /instantclient_sdk.zip
-
-# Install OCI
-RUN pecl channel-update pecl.php.net && \
-    echo 'export LD_LIBRARY_PATH="/usr/local/instantclient"' >> /root/.bashrc && \
-    echo 'umask 002' >> /root/.bashrc && \
-    echo 'instantclient,/usr/local/instantclient' | pecl install oci8-${OCI_VERSION} && \
-    echo "extension=oci8.so" > /etc/php/${PHP_VERSION}/fpm/conf.d/php-oci8.ini && \
-    echo "extension=oci8.so" > /etc/php/${PHP_VERSION}/cli/conf.d/php-oci8.ini
+RUN apt install -y php-ssh2
 
 EXPOSE 80
 EXPOSE 443
