@@ -1,5 +1,9 @@
 FROM ubuntu:20.04
 
+# Copy clean script
+COPY scripts/apt-clean.sh /bin/apt-clean
+RUN chmod 755 /bin/apt-clean
+
 # Versions
 ENV NGINX_VERSION=1.18.* \
     SUPERVISOR_VERSION=4.1.* \
@@ -16,8 +20,7 @@ ENV NGINX_VERSION=1.18.* \
 ARG DEBIAN_FRONTEND=noninteractive
 
 # Install apt-utils
-RUN apt-get update -y && apt-get install --no-install-recommends --no-install-suggests -y apt-utils && \
-    rm -rf /var/lib/apt/lists/* && apt-get autoremove -y && apt-get clean -y
+RUN apt-get update -y && apt-get install --no-install-recommends --no-install-suggests -y apt-utils && apt-clean
 
 # Install required/helper packages
 RUN apt-get update -y && apt-get install --no-install-recommends --no-install-suggests -y \
@@ -48,9 +51,7 @@ RUN apt-get update -y && apt-get install --no-install-recommends --no-install-su
     unzip \
     zip \
     xz-utils && \
-    rm -rf /var/lib/apt/lists/* && \
-    apt-get autoremove -y && \
-    apt-get clean -y
+    apt-clean
 
 # Install PHP
 RUN add-apt-repository ppa:ondrej/php -y && apt-get update -y && apt-get install --no-install-recommends --no-install-suggests -y \
@@ -76,13 +77,11 @@ RUN add-apt-repository ppa:ondrej/php -y && apt-get update -y && apt-get install
     php-redis=${PHP_REDIS_VERSION} \
     php-ssh2 \
     php-uploadprogress && \
-    rm -rf /var/lib/apt/lists/* && \
-    apt-get autoremove -y && \
-    apt-get clean -y
+    apt-clean
 
 # Copy Oracle Instantclient files
-COPY ./instantclient/instantclient.zip /instantclient.zip
-COPY ./instantclient/instantclient_sdk.zip /instantclient_sdk.zip
+COPY instantclient/instantclient.zip /instantclient.zip
+COPY instantclient/instantclient_sdk.zip /instantclient_sdk.zip
 
 # Install Oracle Instantclient
 RUN unzip instantclient.zip -d /usr/local && \
@@ -100,17 +99,29 @@ RUN pecl channel-update pecl.php.net && \
     echo "extension=oci8.so" > /etc/php/${PHP_VERSION}/cli/conf.d/php-oci8.ini && \
     pecl clear-cache
 
+# Data volume group
+RUN groupadd -g 1212 data && \
+    usermod -a -G data www-data
+
 EXPOSE 80
 EXPOSE 443
 
-RUN ln -s /usr/bin/pdftotext /usr/local/bin/pdftotext && chmod 755 /usr/local/bin/pdftotext
+# Configuration files
+COPY configs/nginx/default.conf /etc/nginx/sites-enabled/default
+COPY configs/php/pool.conf /etc/php/${PHP_VERSION}/fpm/pool.d/www.conf
 
-COPY ./eworks-logo.png /var/www/html/eworks-logo.png
-COPY ./index.html /var/www/html/index.html
+# Symlinks and directories
+RUN ln -s /usr/bin/pdftotext /usr/local/bin/pdftotext && chmod 755 /usr/local/bin/pdftotext
+RUN mkdir -p /run/php
+
+# Branding and homepage
+COPY homepage /var/www/html
 
 # ENV variables
 ENV ENVIRONMENT=development \
-    IMAGE_TYPE=generic
+    DOCKER_IMAGE=eworkssk/ubuntu-nginx-php-oci \
+    DOCKER_IMAGE_EDITION=default \
+    DOCKER_IMAGE_VERSION=2.0.0-beta2
 
-COPY ./supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+COPY configs/supervisor/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 CMD ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
