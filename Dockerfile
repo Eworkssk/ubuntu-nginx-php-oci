@@ -36,6 +36,7 @@ RUN apt-get update -y && apt-get install --no-install-recommends --no-install-su
     imagemagick=${IMAGICK_VERSION} \
     jq \
     libedit-dev \
+    libfcgi-bin \
     libfcgi0ldbl \
     libfreetype-dev \
     libaio-dev \
@@ -106,10 +107,6 @@ RUN groupadd -g 1212 data && \
 EXPOSE 80
 EXPOSE 443
 
-# Configuration files
-COPY configs/nginx/default.conf /etc/nginx/sites-enabled/default
-COPY configs/php/pool.conf /etc/php/${PHP_VERSION}/fpm/pool.d/www.conf
-
 # Symlinks and directories
 RUN ln -s /usr/bin/pdftotext /usr/local/bin/pdftotext && chmod 755 /usr/local/bin/pdftotext
 RUN mkdir -p /run/php
@@ -121,7 +118,21 @@ COPY homepage /var/www/html
 ENV ENVIRONMENT=development \
     DOCKER_IMAGE=eworkssk/ubuntu-nginx-php-oci \
     DOCKER_IMAGE_EDITION=default \
-    DOCKER_IMAGE_VERSION=2.0.0-beta2
+    DOCKER_IMAGE_VERSION=2.0.0-rc1 \
+    PHP_FPM_POOL_LISTEN=/run/php/php${PHP_VERSION}-fpm.sock \
+    PHP_FPM_POOL_STATUS=/status \
+    HEALTHCHECK_LOG_FILE=/var/log/healthcheck.log
+
+# Configuration files
+COPY configs/nginx/default.conf /etc/nginx/sites-enabled/default
+COPY configs/php/pool.conf /etc/php/${PHP_VERSION}/fpm/pool.d/www.conf
+
+# Healthcheck
+COPY healthcheck/healthcheck.sh /usr/local/bin/healthcheck
+COPY healthcheck/nginx.sh /usr/local/bin/nginx-healthcheck
+COPY healthcheck/php-fpm.sh /usr/local/bin/php-fpm-healthcheck
+
+HEALTHCHECK --interval=5s --timeout=5s --start-period=15s --retries=3 CMD healthcheck
 
 COPY configs/supervisor/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 CMD ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
