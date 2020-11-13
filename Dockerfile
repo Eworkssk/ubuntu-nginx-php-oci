@@ -1,51 +1,63 @@
-FROM ubuntu:18.04
+FROM ubuntu:20.04
 
-ENV NGINX_VERSION=1.14.* \
-    SUPERVISOR_VERSION=3.3.* \
-    PHP_VERSION=7.3 \
-    ORACLE_VERSION=19.3 \
-    ORACLE_VERSION_PATH="19_3" \
-    OCI_VERSION=2.2.0
+# Copy clean script
+COPY scripts/apt-clean.sh /bin/apt-clean
+RUN chmod 755 /bin/apt-clean
+
+# Versions
+ENV NGINX_VERSION=1.18.* \
+    SUPERVISOR_VERSION=4.1.* \
+    PHP_VERSION=7.4 \
+    PHP_REDIS_VERSION=5.3.* \
+    IMAGICK_VERSION=8:6.9.10.* \
+    PHP_IMAGICK_VERSION=3.4.* \
+    ORACLE_INSTANTCLIENT_VERSION="19_8" \
+    PHP_OCI_VERSION=2.2.0 \
+    GHOSTSCRIPT_VERSION=9.50* \
+    POPPLER_UTILS_VERSION=0.86.* \
+    LOGROTATE_VERSION=3.14.*
 
 ARG DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update -y && apt install --no-install-recommends --no-install-suggests -y apt-utils
+# Install apt-utils
+RUN apt-get update -y && apt-get install --no-install-recommends --no-install-suggests -y apt-utils && apt-clean
 
-# Install required software
-RUN apt-get update -y && apt-get upgrade -y && apt-get install --no-install-recommends --no-install-suggests -y \
-    software-properties-common \
+# Install required/helper packages
+RUN apt-get update -y && apt-get install --no-install-recommends --no-install-suggests -y \
     apt-transport-https \
+    build-essential \
     ca-certificates \
-    git \
-    ssh \
     curl \
-    gnupg2 \
     dirmngr \
     g++ \
+    ghostscript=${GHOSTSCRIPT_VERSION} \
+    git \
+    gnupg \
+    imagemagick=${IMAGICK_VERSION} \
     jq \
     libedit-dev \
+    libfcgi-bin \
     libfcgi0ldbl \
-    libfreetype6-dev \
+    libfreetype-dev \
     libaio-dev \
     libicu-dev \
     libmcrypt-dev \
-    libpq-dev \
+    logrotate=${LOGROTATE_VERSION} \
+    nano \
+    nginx-full=${NGINX_VERSION} \
+    poppler-utils=${POPPLER_UTILS_VERSION} \
+    software-properties-common \
+    ssh \
     supervisor=${SUPERVISOR_VERSION} \
     unzip \
     zip \
-    tar \
-    nano
+    xz-utils && \
+    apt-clean
 
-# Custom apt repositories
-RUN add-apt-repository ppa:ondrej/php -y && \
-    apt-get update -y
-
-# Install nginx
-RUN apt-get install -y nginx-full=${NGINX_VERSION}
-
-# Install PHP and stuff
-RUN apt-get update -y && apt-get install -y php${PHP_VERSION} \
+# Install PHP
+RUN add-apt-repository ppa:ondrej/php -y && apt-get update -y && apt-get install --no-install-recommends --no-install-suggests -y \
     php${PHP_VERSION}-bcmath \
+    php${PHP_VERSION}-bz2 \
     php${PHP_VERSION}-cli \
     php${PHP_VERSION}-curl \
     php${PHP_VERSION}-dev \
@@ -61,46 +73,66 @@ RUN apt-get update -y && apt-get install -y php${PHP_VERSION} \
     php${PHP_VERSION}-soap \
     php${PHP_VERSION}-xml \
     php${PHP_VERSION}-zip \
+    php-imagick=${PHP_IMAGICK_VERSION} \
     php-pear \
-    php-xml \
-    php-redis=5.2\* \
-    imagemagick=8:6.9.7.4\* \
-    php-imagick=3.4.4\* \
-    ghostscript=9.26\* \
-    poppler-utils=0.62\*
+    php-redis=${PHP_REDIS_VERSION} \
+    php-ssh2 \
+    php-uploadprogress && \
+    apt-clean
 
-# Instantclient
-COPY ./instantclient/instantclient.zip /instantclient.zip
-COPY ./instantclient/instantclient_sdk.zip /instantclient_sdk.zip
+# Copy Oracle Instantclient files
+COPY instantclient/instantclient.zip /instantclient.zip
+COPY instantclient/instantclient_sdk.zip /instantclient_sdk.zip
 
+# Install Oracle Instantclient
 RUN unzip instantclient.zip -d /usr/local && \
     unzip instantclient_sdk.zip -d /usr/local && \
-    ln -s /usr/local/instantclient_${ORACLE_VERSION_PATH} /usr/local/instantclient && \
+    ln -s /usr/local/instantclient_${ORACLE_INSTANTCLIENT_VERSION} /usr/local/instantclient && \
     ln -s /usr/local/instantclient/lib* /usr/lib && \
     rm /instantclient.zip && rm /instantclient_sdk.zip
 
-# Install OCI
+# Install PHP OCI8 extension
 RUN pecl channel-update pecl.php.net && \
     echo 'export LD_LIBRARY_PATH="/usr/local/instantclient"' >> /root/.bashrc && \
     echo 'umask 002' >> /root/.bashrc && \
-    echo 'instantclient,/usr/local/instantclient' | pecl install oci8-${OCI_VERSION} && \
+    echo 'instantclient,/usr/local/instantclient' | pecl install oci8-${PHP_OCI_VERSION} && \
     echo "extension=oci8.so" > /etc/php/${PHP_VERSION}/fpm/conf.d/php-oci8.ini && \
-    echo "extension=oci8.so" > /etc/php/${PHP_VERSION}/cli/conf.d/php-oci8.ini
+    echo "extension=oci8.so" > /etc/php/${PHP_VERSION}/cli/conf.d/php-oci8.ini && \
+    pecl clear-cache
+
+# Data volume group
+RUN groupadd -g 1212 data && \
+    usermod -a -G data www-data
 
 EXPOSE 80
 EXPOSE 443
 
-VOLUME /var/log
-RUN mkdir -p /var/log/nginx && mkdir -p /var/log/supervisor && chmod -R 664 /var/log
-
-VOLUME /var/www/cgi-bin
-VOLUME /var/www/html
-
-COPY ./supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-COPY ./eworks-logo.png /var/www/html/eworks-logo.png
-COPY ./index.html /var/www/html/index.html
-
-RUN mkdir -p /var/run/php
+# Symlinks and directories
 RUN ln -s /usr/bin/pdftotext /usr/local/bin/pdftotext && chmod 755 /usr/local/bin/pdftotext
+RUN mkdir -p /run/php
 
+# Branding and homepage
+COPY homepage /var/www/html
+
+# ENV variables
+ENV ENVIRONMENT=development \
+    DOCKER_IMAGE=eworkssk/ubuntu-nginx-php-oci \
+    DOCKER_IMAGE_EDITION=default \
+    DOCKER_IMAGE_VERSION=2.0.0 \
+    PHP_FPM_POOL_LISTEN=/run/php/php${PHP_VERSION}-fpm.sock \
+    PHP_FPM_POOL_STATUS=/status \
+    HEALTHCHECK_LOG_FILE=/var/log/healthcheck.log
+
+# Configuration files
+COPY configs/nginx/default.conf /etc/nginx/sites-enabled/default
+COPY configs/php/pool.conf /etc/php/${PHP_VERSION}/fpm/pool.d/www.conf
+
+# Healthcheck
+COPY healthcheck/healthcheck.sh /usr/local/bin/healthcheck
+COPY healthcheck/nginx.sh /usr/local/bin/nginx-healthcheck
+COPY healthcheck/php-fpm.sh /usr/local/bin/php-fpm-healthcheck
+
+HEALTHCHECK --interval=5s --timeout=5s --start-period=15s --retries=3 CMD healthcheck
+
+COPY configs/supervisor/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 CMD ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
