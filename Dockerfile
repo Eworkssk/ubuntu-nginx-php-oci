@@ -11,8 +11,6 @@ ENV NGINX_VERSION=1.18.* \
     PHP_REDIS_VERSION=5.3.* \
     IMAGICK_VERSION=8:6.9.10.* \
     PHP_IMAGICK_VERSION=3.4.* \
-    ORACLE_INSTANTCLIENT_VERSION="19_8" \
-    PHP_OCI_VERSION=2.2.0 \
     GHOSTSCRIPT_VERSION=9.50* \
     POPPLER_UTILS_VERSION=0.86.* \
     LOGROTATE_VERSION=3.14.*
@@ -80,26 +78,6 @@ RUN add-apt-repository ppa:ondrej/php -y && apt-get update -y && apt-get install
     php-uploadprogress && \
     apt-clean
 
-# Copy Oracle Instantclient files
-COPY instantclient/instantclient.zip /instantclient.zip
-COPY instantclient/instantclient_sdk.zip /instantclient_sdk.zip
-
-# Install Oracle Instantclient
-RUN unzip instantclient.zip -d /usr/local && \
-    unzip instantclient_sdk.zip -d /usr/local && \
-    ln -s /usr/local/instantclient_${ORACLE_INSTANTCLIENT_VERSION} /usr/local/instantclient && \
-    ln -s /usr/local/instantclient/lib* /usr/lib && \
-    rm /instantclient.zip && rm /instantclient_sdk.zip
-
-# Install PHP OCI8 extension
-RUN pecl channel-update pecl.php.net && \
-    echo 'export LD_LIBRARY_PATH="/usr/local/instantclient"' >> /root/.bashrc && \
-    echo 'umask 002' >> /root/.bashrc && \
-    echo 'instantclient,/usr/local/instantclient' | pecl install oci8-${PHP_OCI_VERSION} && \
-    echo "extension=oci8.so" > /etc/php/${PHP_VERSION}/fpm/conf.d/php-oci8.ini && \
-    echo "extension=oci8.so" > /etc/php/${PHP_VERSION}/cli/conf.d/php-oci8.ini && \
-    pecl clear-cache
-
 # Data volume group
 RUN groupadd -g 1212 data && \
     usermod -a -G data www-data
@@ -117,8 +95,8 @@ COPY homepage /var/www/html
 # ENV variables
 ENV ENVIRONMENT=development \
     DOCKER_IMAGE=eworkssk/ubuntu-nginx-php-oci \
-    DOCKER_IMAGE_EDITION=default \
-    DOCKER_IMAGE_VERSION=2.0.0 \
+    DOCKER_IMAGE_EDITION=base \
+    DOCKER_IMAGE_VERSION=base-2.0.1 \
     PHP_FPM_POOL_LISTEN=/run/php/php${PHP_VERSION}-fpm.sock \
     PHP_FPM_POOL_STATUS=/status \
     HEALTHCHECK_LOG_FILE=/var/log/healthcheck.log
