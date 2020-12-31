@@ -7,6 +7,8 @@
 
 Simple to use, yet stable and performant Docker image providing PHP 7.4 with OCI8 extension behind NGINX reverse proxy running the latest version of Ubuntu 20.04 LTS.
 
+**PHP 8 coming soon in 2021**
+
 *This image will be now regularly updated and tested-through every 2-3 months* \
 _Next update: probably between february-march 2021_
 

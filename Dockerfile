@@ -132,7 +132,7 @@ COPY healthcheck/healthcheck.sh /usr/local/bin/healthcheck
 COPY healthcheck/nginx.sh /usr/local/bin/nginx-healthcheck
 COPY healthcheck/php-fpm.sh /usr/local/bin/php-fpm-healthcheck
 
-HEALTHCHECK --interval=5s --timeout=5s --start-period=15s --retries=3 CMD healthcheck
+HEALTHCHECK --interval=10s --timeout=5s --start-period=15s --retries=3 CMD healthcheck
 
 COPY configs/supervisor/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 CMD ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
