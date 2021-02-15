@@ -5,7 +5,8 @@ ENV NGINX_VERSION=1.14.* \
     PHP_VERSION=7.3 \
     ORACLE_VERSION=19.3 \
     ORACLE_VERSION_PATH="19_3" \
-    OCI_VERSION=2.2.0
+    OCI_VERSION=2.2.0 \
+    LIBVIPS_VERSION=8.10.5
 
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -63,11 +64,23 @@ RUN apt-get update -y && apt-get install -y php${PHP_VERSION} \
     php${PHP_VERSION}-zip \
     php-pear \
     php-xml \
-    php-redis=5.2\* \
+    php-redis=5.3\* \
     imagemagick=8:6.9.7.4\* \
     php-imagick=3.4.4\* \
     ghostscript=9.26\* \
     poppler-utils=0.62\*
+
+# Install libvips
+RUN apt-get install -y wget build-essential pkg-config libglib2.0-dev libexpat1-dev \
+        liblcms2-dev libpoppler-glib-dev librsvg2-dev libcairo2 libcairo2-dev libwebp-dev libtiff-dev libgif-dev \
+        libmagick++-dev=8:6.9.7.4\* && \
+    wget https://github.com/libvips/libvips/releases/download/v${LIBVIPS_VERSION}/vips-${LIBVIPS_VERSION}.tar.gz && \
+    tar xf vips-${LIBVIPS_VERSION}.tar.gz && \
+    cd vips-${LIBVIPS_VERSION} && \
+    ./configure && \
+    make && \
+    make install && \
+    ldconfig
 
 # Instantclient
 COPY ./instantclient/instantclient.zip /instantclient.zip
