@@ -7,29 +7,23 @@
 
 Simple to use, yet stable and performant Docker image providing PHP 7.4 with OCI8 extension behind NGINX reverse proxy running the latest version of Ubuntu 20.04 LTS.
 
-**PHP 8 coming soon in 2021**
-
-*This image will be now regularly updated and tested-through every 2-3 months* \
-_Next update: probably between february-march 2021_
-
-:information_source: If you don't need the PHP OCI8 extension, you can use our `base` _(coming soon)_ image build. \
-:mag_right: Check out also `ssh2` _(coming soon)_ and `ffmpeg` _(coming soon)_ versions of the image.
+**Need PHP 8.0 CLI? Check out our new image: https://github.com/Eworkssk/docker-php-cli**
 
 ## :rocket: Getting Started
 ### :package: Downloading the image
-We always provide 2 versions of the image: beta and stable. Beta is always available a few days before the actual stable release, so there is really no point of using it!
+Install the latest stable version of the image:
 ```
 docker pull eworkssk/ubuntu-nginx-php-oci:stable
 ```
 ...or download specifically the current stable version:
 ```
-docker pull eworkssk/ubuntu-nginx-php-oci:2.0.0
+docker pull eworkssk/ubuntu-nginx-php-oci:2.1.0
 ```
 
 ### :cyclone: Using the image 
 The image can be used standalone with `docker run` command, or with `docker-compose`, in Swarm mode,...
 ```
-docker run -p 80:80 -v my_website/src:/var/www/html eworkssk/ubuntu-nginx-php-oci:2.0.0
+docker run -p 80:80 -v my_website/src:/var/www/html eworkssk/ubuntu-nginx-php-oci:2.1.0
 ```
 
 
@@ -46,10 +40,10 @@ Full name of this Docker image!
 
 ##### `$DOCKER_IMAGE_EDITION`
 _default: default_ \
-Edition of this Docker image. For example: `default`, `base`, `ffmpeg` or `ssh2`.
+Edition of this Docker image. For example: `default`.
 
 ##### `$DOCKER_IMAGE_VERSION`
-_default: 2.0.0_ \
+_default: 2.1.0_ \
 Version of this Docker image you are currently running.
 
 ##### `$PHP_FPM_POOL_LISTEN`
