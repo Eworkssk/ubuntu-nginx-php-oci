@@ -8,9 +8,7 @@ RUN chmod 755 /bin/apt-clean
 ENV NGINX_VERSION=1.18.* \
     SUPERVISOR_VERSION=4.1.* \
     PHP_VERSION=7.4 \
-    PHP_REDIS_VERSION=5.3.* \
     IMAGICK_VERSION=8:6.9.10.* \
-    PHP_IMAGICK_VERSION=3.4.* \
     ORACLE_INSTANTCLIENT_VERSION="19_8" \
     PHP_OCI_VERSION=2.2.0 \
     GHOSTSCRIPT_VERSION=9.50* \
@@ -63,6 +61,7 @@ RUN add-apt-repository ppa:ondrej/php -y && apt-get update -y && apt-get install
     php${PHP_VERSION}-dev \
     php${PHP_VERSION}-fpm \
     php${PHP_VERSION}-gd \
+    php${PHP_VERSION}-imagick \
     php${PHP_VERSION}-imap \
     php${PHP_VERSION}-intl \
     php${PHP_VERSION}-json \
@@ -70,14 +69,13 @@ RUN add-apt-repository ppa:ondrej/php -y && apt-get update -y && apt-get install
     php${PHP_VERSION}-mysql \
     php${PHP_VERSION}-opcache \
     php${PHP_VERSION}-readline \
+    php${PHP_VERSION}-redis \
     php${PHP_VERSION}-soap \
+    php${PHP_VERSION}-ssh2 \
+    php${PHP_VERSION}-uploadprogress \
     php${PHP_VERSION}-xml \
     php${PHP_VERSION}-zip \
-    php-imagick=${PHP_IMAGICK_VERSION} \
-    php-pear \
-    php-redis=${PHP_REDIS_VERSION} \
-    php-ssh2 \
-    php-uploadprogress && \
+    php-pear && \
     apt-clean
 
 # Copy Oracle Instantclient files
