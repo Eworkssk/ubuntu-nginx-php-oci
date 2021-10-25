@@ -15,7 +15,8 @@ ENV NGINX_VERSION=1.18.* \
     PHP_OCI_VERSION=2.2.0 \
     GHOSTSCRIPT_VERSION=9.50* \
     POPPLER_UTILS_VERSION=0.86.* \
-    LOGROTATE_VERSION=3.14.*
+    LOGROTATE_VERSION=3.14.* \
+    LIBVIPS_VERSION=8.11.4
 
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -100,6 +101,19 @@ RUN pecl channel-update pecl.php.net && \
     echo "extension=oci8.so" > /etc/php/${PHP_VERSION}/cli/conf.d/php-oci8.ini && \
     pecl clear-cache
 
+# Install libvips
+RUN apt-get update -y && apt-get install --no-install-recommends --no-install-suggests -y \
+        wget build-essential pkg-config libglib2.0-dev libexpat1-dev liblcms2-dev libpoppler-glib-dev librsvg2-dev \
+        libcairo2 libcairo2-dev libwebp-dev libtiff-dev libgif-dev libmagick++-dev=${IMAGICK_VERSION}\* && \
+    wget https://github.com/libvips/libvips/releases/download/v${LIBVIPS_VERSION}/vips-${LIBVIPS_VERSION}.tar.gz && \
+    tar xf vips-${LIBVIPS_VERSION}.tar.gz && \
+    cd vips-${LIBVIPS_VERSION} && \
+    ./configure && \
+    make -j8 && \
+    make install && \
+    ldconfig && \
+    apt-clean
+
 # Data volume group
 RUN groupadd -g 1212 data && \
     usermod -a -G data www-data
@@ -118,7 +132,7 @@ COPY homepage /var/www/html
 ENV ENVIRONMENT=development \
     DOCKER_IMAGE=eworkssk/ubuntu-nginx-php-oci \
     DOCKER_IMAGE_EDITION=default \
-    DOCKER_IMAGE_VERSION=2.0.0 \
+    DOCKER_IMAGE_VERSION=2.1.0 \
     PHP_FPM_POOL_LISTEN=/run/php/php${PHP_VERSION}-fpm.sock \
     PHP_FPM_POOL_STATUS=/status \
     HEALTHCHECK_LOG_FILE=/var/log/healthcheck.log
