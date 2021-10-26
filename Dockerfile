@@ -130,7 +130,7 @@ COPY homepage /var/www/html
 ENV ENVIRONMENT=development \
     DOCKER_IMAGE=eworkssk/ubuntu-nginx-php-oci \
     DOCKER_IMAGE_EDITION=default \
-    DOCKER_IMAGE_VERSION=2.1.0 \
+    DOCKER_IMAGE_VERSION=2.1.2 \
     PHP_FPM_POOL_LISTEN=/run/php/php${PHP_VERSION}-fpm.sock \
     PHP_FPM_POOL_STATUS=/status \
     HEALTHCHECK_LOG_FILE=/var/log/healthcheck.log

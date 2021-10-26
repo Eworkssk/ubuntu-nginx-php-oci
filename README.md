@@ -17,13 +17,13 @@ docker pull eworkssk/ubuntu-nginx-php-oci:stable
 ```
 ...or download specifically the current stable version:
 ```
-docker pull eworkssk/ubuntu-nginx-php-oci:2.1.0
+docker pull eworkssk/ubuntu-nginx-php-oci:2.1.2
 ```
 
 ### :cyclone: Using the image 
 The image can be used standalone with `docker run` command, or with `docker-compose`, in Swarm mode,...
 ```
-docker run -p 80:80 -v my_website/src:/var/www/html eworkssk/ubuntu-nginx-php-oci:2.1.0
+docker run -p 80:80 -v my_website/src:/var/www/html eworkssk/ubuntu-nginx-php-oci:2.1.2
 ```
 
 
@@ -43,7 +43,7 @@ _default: default_ \
 Edition of this Docker image. For example: `default`.
 
 ##### `$DOCKER_IMAGE_VERSION`
-_default: 2.1.0_ \
+_default: 2.1.2_ \
 Version of this Docker image you are currently running.
 
 ##### `$PHP_FPM_POOL_LISTEN`
