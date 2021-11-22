@@ -17,13 +17,13 @@ docker pull eworkssk/ubuntu-nginx-php-oci:stable
 ```
 ...or download specifically the current stable version:
 ```
-docker pull eworkssk/ubuntu-nginx-php-oci:2.1.2
+docker pull eworkssk/ubuntu-nginx-php-oci:2.2.0
 ```
 
 ### :cyclone: Using the image 
 The image can be used standalone with `docker run` command, or with `docker-compose`, in Swarm mode,...
 ```
-docker run -p 80:80 -v my_website/src:/var/www/html eworkssk/ubuntu-nginx-php-oci:2.1.2
+docker run -p 80:80 -v my_website/src:/var/www/html eworkssk/ubuntu-nginx-php-oci:2.2.0
 ```
 
 
@@ -43,7 +43,7 @@ _default: default_ \
 Edition of this Docker image. For example: `default`.
 
 ##### `$DOCKER_IMAGE_VERSION`
-_default: 2.1.2_ \
+_default: 2.2.0_ \
 Version of this Docker image you are currently running.
 
 ##### `$PHP_FPM_POOL_LISTEN`
@@ -57,6 +57,10 @@ URL location of PHP's status page. This value is used by health check to determi
 ##### `$HEALTHCHECK_LOG_FILE`
 _default: /var/log/healthcheck.log_ \
 Location of the health check log file.
+
+##### `$TIMEZONE`
+_default: UTC_ \
+Container timezone, for example: `UTC`, `Europe/Bratislava`,...
 
 #### Other "read-only" configuration variables
 If you decide to change any these variables, do it on your own risk:

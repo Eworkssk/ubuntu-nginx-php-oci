@@ -49,6 +49,7 @@ RUN apt-get update -y && apt-get install --no-install-recommends --no-install-su
     ssh \
     supervisor=${SUPERVISOR_VERSION} \
     unzip \
+    tzdata \
     zip \
     xz-utils && \
     apt-clean
@@ -130,10 +131,11 @@ COPY homepage /var/www/html
 ENV ENVIRONMENT=development \
     DOCKER_IMAGE=eworkssk/ubuntu-nginx-php-oci \
     DOCKER_IMAGE_EDITION=default \
-    DOCKER_IMAGE_VERSION=2.1.2 \
+    DOCKER_IMAGE_VERSION=2.2.0 \
     PHP_FPM_POOL_LISTEN=/run/php/php${PHP_VERSION}-fpm.sock \
     PHP_FPM_POOL_STATUS=/status \
-    HEALTHCHECK_LOG_FILE=/var/log/healthcheck.log
+    HEALTHCHECK_LOG_FILE=/var/log/healthcheck.log \
+    TIMEZONE=UTC
 
 # Configuration files
 COPY configs/nginx/default.conf /etc/nginx/sites-enabled/default
@@ -147,4 +149,11 @@ COPY healthcheck/php-fpm.sh /usr/local/bin/php-fpm-healthcheck
 HEALTHCHECK --interval=10s --timeout=5s --start-period=15s --retries=3 CMD healthcheck
 
 COPY configs/supervisor/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-CMD ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
+
+# Copy startup script
+COPY scripts/startup.sh /bin/startup
+RUN chmod 755 /bin/startup
+
+ENTRYPOINT ["startup"]
+
+CMD ["supervisord", "-n", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
