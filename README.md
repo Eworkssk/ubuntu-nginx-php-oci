@@ -5,9 +5,9 @@
 ![Docker Pulls](https://img.shields.io/docker/pulls/eworkssk/ubuntu-nginx-php-oci?style=for-the-badge)
 ![Docker Image Size (tag)](https://img.shields.io/docker/image-size/eworkssk/ubuntu-nginx-php-oci/latest?style=for-the-badge)
 
-Simple to use, yet stable and performant Docker image providing PHP 7.4 with OCI8 extension behind NGINX reverse proxy running the latest version of Ubuntu 20.04 LTS.
+Simple to use, yet stable and performant Docker image providing PHP 7.4 with OCI8 extension behind NGINX reverse proxy running the latest version of Ubuntu 22.04 LTS.
 
-**Need PHP 8.0 CLI? Check out our new image: https://github.com/Eworkssk/docker-php-cli**
+**Need PHP 8.x CLI? Check out our new image: https://github.com/Eworkssk/docker-php-cli**
 
 ## :rocket: Getting Started
 ### :package: Downloading the image
@@ -17,13 +17,13 @@ docker pull eworkssk/ubuntu-nginx-php-oci:stable
 ```
 ...or download specifically the current stable version:
 ```
-docker pull eworkssk/ubuntu-nginx-php-oci:2.2.0
+docker pull eworkssk/ubuntu-nginx-php-oci:3.0.0
 ```
 
 ### :cyclone: Using the image 
 The image can be used standalone with `docker run` command, or with `docker-compose`, in Swarm mode,...
 ```
-docker run -p 80:80 -v my_website/src:/var/www/html eworkssk/ubuntu-nginx-php-oci:2.2.0
+docker run -p 80:80 -v my_website/src:/var/www/html eworkssk/ubuntu-nginx-php-oci:3.0.0
 ```
 
 
@@ -43,7 +43,7 @@ _default: default_ \
 Edition of this Docker image. For example: `default`.
 
 ##### `$DOCKER_IMAGE_VERSION`
-_default: 2.2.0_ \
+_default: 3.0.0_ \
 Version of this Docker image you are currently running.
 
 ##### `$PHP_FPM_POOL_LISTEN`

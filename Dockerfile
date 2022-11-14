@@ -1,4 +1,4 @@
-FROM ubuntu:20.04
+FROM ubuntu:22.04
 
 # Copy clean script
 COPY scripts/apt-clean.sh /bin/apt-clean
@@ -6,15 +6,15 @@ RUN chmod 755 /bin/apt-clean
 
 # Versions
 ENV NGINX_VERSION=1.18.* \
-    SUPERVISOR_VERSION=4.1.* \
+    SUPERVISOR_VERSION=4.2.* \
     PHP_VERSION=7.4 \
-    IMAGICK_VERSION=8:6.9.10.* \
-    ORACLE_INSTANTCLIENT_VERSION="19_8" \
+    IMAGICK_VERSION=8:6.9.11.* \
+    ORACLE_INSTANTCLIENT_VERSION="21_8" \
     PHP_OCI_VERSION=2.2.0 \
-    GHOSTSCRIPT_VERSION=9.50* \
-    POPPLER_UTILS_VERSION=0.86.* \
-    LOGROTATE_VERSION=3.14.* \
-    LIBVIPS_VERSION=8.11.4
+    GHOSTSCRIPT_VERSION=9.55* \
+    POPPLER_UTILS_VERSION=22.02.* \
+    LOGROTATE_VERSION=3.19.* \
+    LIBVIPS_VERSION=8.13.3
 
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -131,7 +131,7 @@ COPY homepage /var/www/html
 ENV ENVIRONMENT=development \
     DOCKER_IMAGE=eworkssk/ubuntu-nginx-php-oci \
     DOCKER_IMAGE_EDITION=default \
-    DOCKER_IMAGE_VERSION=2.2.0 \
+    DOCKER_IMAGE_VERSION=3.0.0 \
     PHP_FPM_POOL_LISTEN=/run/php/php${PHP_VERSION}-fpm.sock \
     PHP_FPM_POOL_STATUS=/status \
     HEALTHCHECK_LOG_FILE=/var/log/healthcheck.log \
